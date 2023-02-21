@@ -1,18 +1,17 @@
 ---
 - name: Download and unzip maven
-  unarchive: 
-    src: https://dlcdn.apache.org/maven/maven-{{maven_major_version}}/{{maven_version}}/binaries/apache-maven-{{maven_version}}-bin.tar.gz
+  ansible.builtin.unarchive:
+    src: https://dlcdn.apache.org/maven/maven-{{ maven_major_version }}/{{ maven_version }}/binaries/apache-maven-{{ maven_version }}-bin.tar.gz
     dest: /opt/
-    remote_src: yes
-    validate_certs: no
-- name: prepare maven env file
-  lineinfile:
+    remote_src: true
+    validate_certs: false
+- name: Prepare maven env file
+  ansible.builtin.lineinfile:
     dest: /etc/profile.d/maven.sh
-    create: yes
-    mode: 0755
+    create: true
+    mode: "755"
     line: "{{ item }}"
-
   loop:
-  - 'export M2_HOME=/opt/apache-maven-{{maven_version}}'
-  - 'export M2=$M2_HOME/bin'
-  - 'export PATH=$PATH:$M2'
+    - export M2_HOME=/opt/apache-maven-{{ maven_version }}
+    - export M2=$M2_HOME/bin
+    - export PATH=$PATH:$M2

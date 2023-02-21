@@ -1,29 +1,43 @@
 ---
-- name: provision des vm dev
+- name: Provision des vm dev
   hosts: all
-  become: yes
+  become: true
   vars_files:
-  - vars/webapp-env.yml
+    - vars/webapp-env.yml
   tasks:
-  - name: apt cache update
-    apt:
-      update_cache: yes
-  - name: install utils
-    apt: 
-      name: 
-      - git
-      - vim
-      - wget
-      - curl
-  - name: install java
-    apt: 
-    - name: 
-      - "{{java_package_project}}"
-  - name: instal Maven
-    include_tasks: tasks/maven.yml
-  - name: Clone the github repository usine-logicielle
-    git:
-      repo: https://github.com/Nuxation/webapp-usine.git
-      dest: /home/vagrant/
-      clone: yes
-      update: yes
+    - name: Install cache update, Utilities, java
+      ansible.builtin.apt:
+        update_cache: true
+        state: present
+        name:
+          - git
+          - vim
+          - wget
+          - "{{ java_package }}"
+          - maven
+
+    - name: Clone the github repository usine-logicielle
+      ansible.builtin.git:
+        repo: https://github.com/Nuxation/webapp-usine.git
+        dest: "{{ project_path }}"
+        clone: true
+        version: "{{ dev_commit }}"
+    - name: Build project with maven
+      ansible.builtin.shell: mvn clean install
+      args:
+        chdir: "{{ project_path }}/"
+      register: mvn_result
+    - name: Build container image
+      community.docker.docker_image:
+        name: webapp
+        build:
+          path: "{{ project_path }}/."
+        state: present
+        source: build
+    - name: Build container
+      community.docker.docker_container:
+        name: server
+        detach: true
+        ports:
+          - 8888:8080
+        image: webapp

@@ -14,6 +14,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "Jenkins" do |jenkins|
     jenkins.vm.box = "ubuntu/focal64"
     jenkins.vm.hostname = "jenkins"
+    jenkins.vm.provision "docker"
     jenkins.vm.network "private_network", ip: "192.168.33.11"
     jenkins.vm.provider "virtualbox" do |vb|
       vb.name = "Jenkins"
@@ -56,19 +57,21 @@ Vagrant.configure(2) do |config|
       vb.cpus = 1
     end
   end
-  
-  (1..3).each do |i|
+
+  N = 3
+  (1..N).each do |i|
     config.vm.define "Dev#{i}" do |dev|
       dev.vm.box = "ubuntu/focal64"
       dev.vm.hostname = "dev#{i}"
-      dev.vm.network "private_network", ip: "192.168.5.1#{i}"
-      dev.vm.provision "shell", inline: $script_inject_pk
+      dev.vm.network "private_network", ip: "192.168.5.#{10+i}"
       dev.vm.provision "docker"
-      dev.vm.provision "shell", path: "dev-init.sh"
       dev.vm.provider "virtualbox" do |vb|
         vb.name = "Dev#{i}"
         vb.memory = 1024
         vb.cpus = 1
+      end
+      dev.vm.provision "ansible" do |ansible|
+        ansible.playbook = "ansible/dev.yml"
       end
     end
   end
