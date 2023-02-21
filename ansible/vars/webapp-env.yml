@@ -1,0 +1,3 @@
+java_package:  openjdk-11-jdk
+maven_major_version: 3
+maven_version: 3.8.7
