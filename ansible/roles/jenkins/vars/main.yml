@@ -1,0 +1,8 @@
+---
+# vars file for jenkins
+java: openjdk-11-jdk
+jenkins:
+  repo_key_url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+  repo_url: deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+sonarqube:
+  version: 8.9.10.61524

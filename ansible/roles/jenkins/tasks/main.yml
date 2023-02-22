@@ -1,0 +1,5 @@
+---
+# tasks file for jenkins
+- include_tasks: jk.yml
+- include_tasks: sonarq.yml
+- include_tasks: artifactory.yml

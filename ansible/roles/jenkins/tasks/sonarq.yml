@@ -1,0 +1,43 @@
+---
+- name: Ensure dependencies are installed.
+  ansible.builtin.apt:
+    name:
+      - zip
+    state: present
+  become: true
+- name: Check if sonarqube is installed
+  ansible.builtin.stat:
+    path: /opt/sonarqube
+  register: sq
+- name: Install sonarqube block
+  when: not sq.stat.exists
+  block:
+    - name: Create user sonar
+      ansible.builtin.user:
+        name: sonar
+        createhome: false
+        shell: /bin/false
+    - name: Get sonar binaries
+      ansible.builtin.unarchive:
+        src: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube.version }}.zip
+        remote_src: true
+        dest: /opt/
+        owner: sonar
+        group: sonar
+        validate_certs: false
+    - name: Rename sonarqube folder
+      ansible.builtin.command:
+        cmd: mv sonarqube-{{ sonarqube.version }} sonarqube
+        chdir: /opt/
+    - name: Create sonarqube service
+      ansible.builtin.copy:
+        src: files/sonarqube.service
+        dest: /etc/systemd/system/
+    - name: start and enable sonarqube
+      systemd:
+        daemon_reload: yes
+    - name: Start and enable sonarqube
+      ansible.builtin.service:
+        name: sonarqube
+        state: started
+        enabled: true

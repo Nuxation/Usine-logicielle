@@ -1,0 +1,36 @@
+---
+# tasks file for jenkins
+- name: Ensure dependencies are installed.
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gpg
+      - "{{ java }}"
+    state: present
+- name: Add Jenkins apt repository key.
+  ansible.builtin.get_url:
+    url: "{{ jenkins.repo_key_url }}"
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+    mode: "0644"
+    force: true
+- name: Add Jenkins apt repository.
+  ansible.builtin.apt_repository:
+    repo: "{{ jenkins.repo_url }}"
+    state: present
+    update_cache: true
+- name: Ensure Jenkins is installed.
+  ansible.builtin.apt:
+    name: jenkins
+    state: present
+- name: Start service jenkins
+  ansible.builtin.service:
+    name: jenkins
+    state: started
+    enabled: true
+- name: Get Jenkins admin key
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  ignore_errors: true
+  register: jenkins_password
+
+- debug:
+    msg: "{{jenkins_password.stdout}}"

@@ -18,8 +18,11 @@ Vagrant.configure(2) do |config|
     jenkins.vm.network "private_network", ip: "192.168.33.11"
     jenkins.vm.provider "virtualbox" do |vb|
       vb.name = "Jenkins"
-      vb.memory = 4096
+      vb.memory = 8192
       vb.cpus = 2
+    end
+    jenkins.vm.provision "ansible" do |ansible|
+      ansible.playbook = "ansible/jenkins.yml"
     end
   end
 

@@ -1,0 +1,6 @@
+---
+- name: Mise en place du server CI
+  hosts: all
+  become: true
+  roles:
+    - role: 'jenkins'
